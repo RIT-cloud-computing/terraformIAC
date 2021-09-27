@@ -53,27 +53,25 @@ resource "aws_subnet" "private2" {
 resource "aws_route_table" "public_route_table" {
   vpc_id = aws_vpc.my_vpc.id
 
-  route = [
-    {
-      cidr_block = "0.0.0.0/0"
-      gateway_id = aws_internet_gateway.internet_gateway.id
-    }
-  ]
+}
+
+resource "aws_route" "aws_route_public" {
+  route_table_id = aws_route_table.public_route_table.id
+  destination_cidr_block = "0.0.0.0/0"
+  gateway_id = aws_internet_gateway.internet_gateway.id
 }
 
 # private route table
 resource "aws_route_table" "private_route_table" {
   vpc_id = aws_vpc.my_vpc.id
 
-  route = [
-    {
-      cidr_block = "0.0.0.0/0"
-      nat_gateway_id = aws_nat_gateway.nat_gateway.id
-    }
-  ]
 }
 
-
+resource "aws_route" "aws_route_private" {
+  route_table_id = aws_route_table.private_route_table.id
+  destination_cidr_block = "0.0.0.0/0"
+  gateway_id = aws_internet_gateway.internet_gateway.id
+}
 
 # NAT gateway
 resource "aws_nat_gateway" "nat_gateway" {
@@ -89,7 +87,7 @@ resource "aws_eip" "eip" {
 
 # AWS Instance (ec2)
 resource "aws_instance" "main_instance" {
-     ami = ami-00dfe2c7ce89a450b            #standard free tier amazon-linux-ami
+     ami = "ami-00dfe2c7ce89a450b"            #standard free tier amazon-linux-ami
      instance_type = "t2.micro"
      availability_zone = "us-east-1"
 }
