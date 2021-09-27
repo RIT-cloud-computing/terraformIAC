@@ -1,9 +1,53 @@
 # this is the main terraform file
 
-#AWS Instance
+# vpc
+resource "aws_vpc" "my_vpc" {
+  cidr_block = "10.0.0.0/24"
+  enable_dns_hostnames: true
+  enable_dns_support: true
+}
 
+# subnets
+resource "aws_subnet" "public1" {
+  vpc_id            = aws_vpc.my_vpc.id
+  cidr_block        = "10.0.0.0/26"
+  availability_zone = "us-east-1"
+}
+resource "aws_subnet" "public2" {
+  vpc_id            = aws_vpc.my_vpc.id
+  cidr_block        = "10.0.0.64/26"
+  availability_zone = "us-east-1"
+}
+resource "aws_subnet" "private1" {
+  vpc_id            = aws_vpc.my_vpc.id
+  cidr_block        = "10.0.0.128/26"
+  availability_zone = "us-east-1"
+}
+resource "aws_subnet" "private2" {
+  vpc_id            = aws_vpc.my_vpc.id
+  cidr_block        = "10.0.0.192/26"
+  availability_zone = "us-east-1"
+}
+
+#AWS Instance (ec2)
 resource "aws_instance" "main_instance" {
-     ami = ami-00dfe2c7ce89a450b
+     ami = ami-00dfe2c7ce89a450b            #standard free tier amazon-linux-ami
      instance_type = "t2.micro"
      availability_zone = "us-east-1"
+}
+
+# security group
+resource "aws_security_group" "allow_tls" {
+  name        = "allow_tls"
+  description = "Allow ssh access via port 22"
+  vpc_id      = aws_vpc.my_vpc.id
+
+  ingress = [
+    {
+      from_port        = 22
+      to_port          = 22
+      protocol         = "tcp"
+      cidr_blocks      = [aws_vpc.my_vpc.cidr_block]
+    }
+  ]
 }
